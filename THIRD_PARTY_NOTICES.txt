@@ -1,0 +1,48 @@
+第三方组件声明
+==============
+
+本项目（LC2AutoWhirlwindMonitor）为失落城堡 2 的 BepInEx 插件。
+下列第三方组件随 GitHub Release 的整包（LC2AutoWhirlwindMonitor-v0.6.3-BepInEx.zip）
+一同分发，其版权归各自作者所有，遵循各自的开源许可证。
+本节仅为便于使用的汇总说明，不修改任何组件的原始许可证条款。
+
+1. BepInEx
+   - 项目地址：https://github.com/BepInEx/BepInEx
+   - 随包版本：6.0.0-be.764+5f39645992ab8b944cad394b63470e4920f8b16d
+   - 许可证：GNU Lesser General Public License v2.1（LGPL-2.1）
+   - 随包路径：BepInEx/core/
+   - 包含组件：BepInEx.Core、BepInEx.Unity.IL2CPP、0Harmony、Il2CppInterop 系列、
+     MonoMod、Cpp2IL、AsmResolver、Mono.Cecil 等及其依赖。
+
+2. UnityDoorstop
+   - 项目地址：https://github.com/NeighTools/UnityDoorstop
+   - 随包版本：4.5.0
+   - 许可证：GNU Lesser General Public License v2.1（LGPL-2.1）
+   - 随包路径：winhttp.dll、doorstop_config.ini、.doorstop_version
+
+3. .NET Runtime（Microsoft .NET 6 / CoreCLR）
+   - 项目地址：https://github.com/dotnet/runtime
+   - 许可证：MIT License
+   - 随包路径：dotnet/
+
+4. Unity 基础库（Unity Base Libraries）
+   - 来源：https://unity.bepinex.dev/libraries/6000.3.23.zip
+   - 说明：与游戏所用 Unity 6000.3.23f1 版本对应的托管基础库，
+     Il2CppInterop 据此生成 interop 程序集。
+   - 随包路径：BepInEx/unity-libs/
+   - 版权归属 Unity Technologies，请参考 Unity 的授权条款使用。
+
+完整许可证文本
+--------------
+
+LGPL-2.1 全文见：licenses/LGPL-2.1.txt
+MIT 许可证全文见：LICENSE （本项目）、各组件源码仓库内副本。
+
+使用限制
+--------
+
+本发布包不包含任何游戏本体文件，也不包含从游戏程序集提取的 interop 程序集。
+
+发布包中的第三方组件按“原样”提供，不附带任何明示或暗示的担保。
+如需修改或重新分发 BepInEx、UnityDoorstop 等 LGPL-2.1 组件，
+请遵守 LGPL-2.1 关于源代码获取和许可证保留的要求。

@@ -1,0 +1,38 @@
+# 构建产物
+bin/
+obj/
+
+# 本地游戏环境与框架
+/BepInEx/
+/dotnet/
+winhttp.dll
+doorstop_config.ini
+.doorstop_version
+
+# 游戏本体
+/LostCastle2_Data/
+/GameAssembly.dll
+/LostCastle2.exe
+/UnityCrashHandler64.exe
+/UnityPlayer.dll
+/baselib.dll
+/changelog.txt
+
+# 反编译输出、工具、日志与缓存
+/Decompiled/
+/.tools/
+/artifacts/
+/build/
+*.log
+*.tmp
+
+# 发布包
+*.zip
+SHA256SUMS.txt
+
+# 编辑器与系统文件
+.vs/
+.idea/
+*.user
+Thumbs.db
+desktop.ini
