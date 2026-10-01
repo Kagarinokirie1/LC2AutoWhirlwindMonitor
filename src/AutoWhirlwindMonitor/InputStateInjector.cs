@@ -17,6 +17,21 @@ internal sealed class InputStateInjector
 
     internal bool TryBeginPress(CreatureInputCtrl input, KeyType keyType)
     {
+        return TryBeginPress(input, keyType, true);
+    }
+
+    // 闪避键只需要在注入帧被 DodgeCancel 读取一次；不建立 PressDown 跨帧缓冲，
+    // 避免同一次 K 在进入 THW_Dodge 后又被连招事件当成第二次按键消费。
+    internal bool TryBeginSingleFramePress(CreatureInputCtrl input, KeyType keyType)
+    {
+        return TryBeginPress(input, keyType, false);
+    }
+
+    private bool TryBeginPress(
+        CreatureInputCtrl input,
+        KeyType keyType,
+        bool createPressDownBuffer)
+    {
         if (input == null)
         {
             return false;
@@ -25,9 +40,14 @@ internal sealed class InputStateInjector
         try
         {
             // 物理按下会同时建立 PressDown 和 Pressing。Pressing, 0 虽然也会写入
-            // WasPressed，但不会创建 PressDown 的跨帧缓冲，因此这里显式补建。
+            // WasPressed，但不会创建 PressDown 的跨帧缓冲。普通攻击键显式补建，
+            // 闪避键则保留单帧语义。
             input.ClearKeyBuffer(keyType, true);
-            input.SetInput(keyType, KeyState.PressDown, 0f);
+            if (createPressDownBuffer)
+            {
+                input.SetInput(keyType, KeyState.PressDown, 0f);
+            }
+
             input.SetInput(keyType, KeyState.Pressing, 0f);
             _activeKeys.Add(keyType);
 

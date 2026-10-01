@@ -13,7 +13,7 @@ public sealed class Plugin : BasePlugin
 {
     public const string Guid = "lc2.autowhirlwind.monitor";
     public const string Name = "LC2 Auto Whirlwind Monitor";
-    public const string Version = "0.6.3";
+    public const string Version = "0.7.1";
 
     internal static Plugin Instance { get; private set; }
     internal static ManualLogSource Logger { get; private set; }
@@ -106,6 +106,46 @@ public sealed class Plugin : BasePlugin
         catch (System.Exception ex)
         {
             Logger.LogError($"[自动旋风斩监测] MotionActor.MotionComboReady 补丁失败：{ex}");
+        }
+
+        try
+        {
+            _harmony.PatchAll(typeof(DodgeCancelEventPatch));
+            Logger.LogInfo("[自动旋风斩监测] 已补丁 MotionEvent_DodgeCancel.EventUpdate_Logic。");
+        }
+        catch (System.Exception ex)
+        {
+            Logger.LogError($"[自动旋风斩监测] MotionEvent_DodgeCancel.EventUpdate_Logic 补丁失败：{ex}");
+        }
+
+        try
+        {
+            _harmony.PatchAll(typeof(MotionActorLogicUpdatePatch));
+            Logger.LogInfo("[自动旋风斩监测] 已补丁 MotionActor.LogicUpdate。");
+        }
+        catch (System.Exception ex)
+        {
+            Logger.LogError($"[自动旋风斩监测] MotionActor.LogicUpdate 补丁失败：{ex}");
+        }
+
+        try
+        {
+            _harmony.PatchAll(typeof(DodgeTargetMotionPatch));
+            Logger.LogInfo("[自动旋风斩监测] 已补丁 MotionActor.SetTargetMotion。");
+        }
+        catch (System.Exception ex)
+        {
+            Logger.LogError($"[自动旋风斩监测] MotionActor.SetTargetMotion 补丁失败：{ex}");
+        }
+
+        try
+        {
+            _harmony.PatchAll(typeof(DodgeTargetMotionForceSetPatch));
+            Logger.LogInfo("[自动旋风斩监测] 已补丁 MotionActor.SetTargetMotion_ForceSet。");
+        }
+        catch (System.Exception ex)
+        {
+            Logger.LogError($"[自动旋风斩监测] MotionActor.SetTargetMotion_ForceSet 补丁失败：{ex}");
         }
 
         _host = new GameObject("LC2_AutoWhirlwindMonitor_Host");

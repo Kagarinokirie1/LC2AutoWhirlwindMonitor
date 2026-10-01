@@ -4,7 +4,7 @@ using HunterMotion;
 
 namespace LC2.AutoWhirlwindMonitor;
 
-internal sealed class AutoWhirlwindController
+internal sealed partial class AutoWhirlwindController
 {
     private enum Phase
     {
@@ -52,6 +52,7 @@ internal sealed class AutoWhirlwindController
         _lastSnapshot = snapshot;
         _inputState.Reset();
         ClearTrackedBuffers();
+        ResetActionFrameClock(snapshot, now);
         Enter(Phase.InitialChargeHold, now, "启动并开始首次 L 蓄力");
     }
 
@@ -62,6 +63,7 @@ internal sealed class AutoWhirlwindController
             return;
         }
 
+        DodgeCancelGuard.Disarm();
         ReleaseInjectedKeys();
         _inputState.Reset();
         _phase = Phase.Stopped;
@@ -69,6 +71,7 @@ internal sealed class AutoWhirlwindController
         _inputPointer = System.IntPtr.Zero;
         _motionPointer = System.IntPtr.Zero;
         _lastSnapshot = null;
+        ClearActionFrameClock();
         Plugin.Logger.LogInfo($"[自动旋风斩] 已停止：{reason}。");
     }
 
@@ -106,7 +109,8 @@ internal sealed class AutoWhirlwindController
         }
 
         _phaseFrame++;
-        float elapsed = now - _phaseStartedAt;
+        AdvanceLogicalTime(snapshot, now);
+        float elapsed = _logicalTime - _phaseStartedAt;
 
         switch (_phase)
         {
@@ -341,10 +345,21 @@ internal sealed class AutoWhirlwindController
 
     private void UpdateDodgeTap(RuntimeSnapshot snapshot, float elapsed, float now)
     {
+        if (_phaseFrame == 0 && ShouldBlockDodgeTap(snapshot))
+        {
+            Enter(Phase.DodgeReleaseWait, now, "当前动作已属于闪避或冲刺攻击，跳过危险 K");
+            return;
+        }
+
         float pressTime = elapsed;
         if (_phaseFrame == 0)
         {
-            BeginPress(KeyType.Dodge);
+            DodgeCancelGuard.Arm(_input, _motionPointer, snapshot);
+            bool injected = _inputState.TryBeginSingleFramePress(_input, KeyType.Dodge);
+            Plugin.Logger.LogInfo(
+                $"[自动旋风斩] 注入单帧 K：结果={injected} 源动作={snapshot.MotionName} "
+                + $"时间={snapshot.MotionTime:0.###} 帧={snapshot.MotionFrame} "
+                + "仅写 Pressing，不建立 PressDown 跨帧缓冲。");
         }
         else
         {
@@ -403,8 +418,13 @@ internal sealed class AutoWhirlwindController
     private void Enter(Phase phase, float now, string reason)
     {
         _phase = phase;
-        _phaseStartedAt = now;
+        _phaseStartedAt = _logicalTime;
         _phaseFrame = -1;
+        if (phase == Phase.DodgeTap)
+        {
+            CaptureDodgeTapSource(_lastSnapshot);
+        }
+
         Plugin.Logger.LogInfo($"[自动旋风斩] 阶段 -> {phase}：{reason}。");
     }
 

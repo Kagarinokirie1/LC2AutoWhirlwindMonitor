@@ -2,7 +2,7 @@
 
 失落城堡 2（Lost Castle 2）双手近战武器的自动旋风斩循环插件，基于 BepInEx 6 IL2CPP 与 Harmony 实现，通过注入游戏内部输入状态完成「蓄力斩 -> 旋风斩 -> 闪避取消」的无限循环。
 
-当前版本：**0.6.3**
+当前版本：**0.7.1**
 
 ## 功能
 
@@ -10,6 +10,9 @@
 - 首次自动进入长按 `L` 蓄力，读取游戏三格蓄力条同源的隐藏阈值计数器，第二格刚满的同一帧立即松手。
 - 松手后在**同一输入帧**注入 `J`，并同时建立 `PressDown` 与 `Pressing` 输入缓冲，复现手动「提前或稍晚报 J」时游戏能识别的预输入。
 - 之后按 `J -> K -> L` 三个普通短按循环，不再每轮重新长按蓄力。
+- `J`、`L` 保留当前帧与约 5 帧预输入缓冲；自动 `K` 只写当前帧 `Pressing`，不建立跨动作 `PressDown` 缓冲，避免同一次闪避输入在 `THW_Dodge` 内被二次消费。
+- 阶段时钟按动作帧推进量运行。连招穿怪出现命中停顿时同步降速，避免 J/K/L 相对动作帧漂移。
+- 在四参数 `MotionActor.SetTargetMotion_ForceSet` 出口增加最终保护，拒绝自动循环守卫范围内的 `Dodge/DodgeAttack -> DodgeAttack` 强制接招，避免错误续接冲刺攻击。
 - 输入注入发生在 `LC2.CreatureInputCtrl.UpdateInput` 执行完成后，确保角色动作判定能读取到当帧状态。
 - 依据 `BasicAtkSpd / AtkSpd` 缩放各阶段时长，自动适配横斩或纵斩的 30% 攻速词条。
 - 启动、停止、异常退出时清理 `J/K/L` 输入缓冲，避免残留缓冲导致手动移动或攻击时自动翻滚。
@@ -30,7 +33,7 @@
 
 ### 方式一：使用带框架的整包（推荐）
 
-从 [Releases](https://github.com/Kagarinokirie1/LC2AutoWhirlwindMonitor/releases) 下载 `LC2AutoWhirlwindMonitor-v0.6.3-BepInEx.zip`，把压缩包内的所有内容解压到游戏根目录（即 `LostCastle2.exe` 所在目录），覆盖同名文件即可。
+从 [Releases](https://github.com/Kagarinokirie1/LC2AutoWhirlwindMonitor/releases) 下载 `LC2AutoWhirlwindMonitor-v0.7.1-BepInEx.zip`，把压缩包内的所有内容解压到游戏根目录（即 `LostCastle2.exe` 所在目录），覆盖同名文件即可。
 
 解压后目录应形如：
 
@@ -115,6 +118,7 @@ Lost Castle 2/
 
 - `首次松开 L 后同帧预输入 J` 之后的动作名与动作时间。
 - 每轮 `J -> K -> L` 的动作名、输入帧与输入冷却。
+- `注入单帧 K`、`DodgeCancel 事件补丁命中` 和 `已拦截 Dodge -> DodgeAttack 目标切换` 等输入保护日志。
 - 蓄力能量、UI 一/二/三格累计阈值与本次释放命中的阈值来源。
 
 ## 从源码构建

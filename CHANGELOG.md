@@ -2,6 +2,64 @@
 
 本文件记录自动旋风斩插件的版本演进，格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 `主版本.次版本.补丁版本`。
 
+## [0.7.1] - 2026-10-01
+
+### 修复
+
+- 修复连招穿过怪物后同一个自动 `K` 被消费两次、续接 `THW_DodgeAttack_A/B` 的问题。
+- 自动 `K` 改为只写当前帧 `Pressing`，不再建立约 5 帧的跨动作 `PressDown` 缓冲；源攻击中的首次闪避仍能正常生效，进入 `THW_Dodge` 后不会再次消费同一次按键。
+- 在四参数 `MotionActor.SetTargetMotion_ForceSet` 出口拦截自动循环守卫范围内的 `Dodge/DodgeAttack -> DodgeAttack` 强制切换，和 `MotionEvent_DodgeCancel` 事件短路共同构成最终保护。
+- 保留动作帧时钟修复，继续避免命中停顿时 J/K/L 相对动作帧漂移。
+
+### 验证
+
+- 本地构建通过，`0` 警告、`0` 错误。
+- 已由用户实机测试确认穿怪后不再触发无限闪避冲刺攻击，自动连招恢复正常。
+
+## [0.7.0] - 2026-10-01
+
+### 变更
+
+- 增加三参数 `MotionActor.SetTargetMotion` 出口拦截，尝试阻止已经锁存的 `THW_Dodge -> THW_DodgeAttack` 动作切换。
+- 增加独立的 `DodgeCancel` 事件命中日志，便于区分事件短路和动作切换出口的实际执行情况。
+
+### 说明
+
+- 实机日志确认三参数出口拦截计数为 `0`；连招事件实际调用四参数 `SetTargetMotion_ForceSet`，该方案由 `0.7.1` 修正。
+
+## [0.6.9] - 2026-10-01
+
+### 修复
+
+- 为 `MotionEvent_DodgeCancel.EventUpdate_Logic` 增加 Harmony 前缀，在当前动作已属于 `Dodge/DodgeAttack` 时直接跳过原事件更新。
+- 短路事件时清理 `Dodge` 的输入缓冲和当前输入状态，避免残留 `K` 在后续动作中继续污染取消逻辑。
+- 保留 `MotionActor.LogicUpdate` 守卫作为事件执行顺序变化时的兜底。
+
+## [0.6.6] - 2026-10-01
+
+### 修复
+
+- 增加 `DodgeInputGuard`，自动 `K` 注入前检查当前动作类型。
+- 当前动作已经包含 `Dodge` 或 `DodgeAttack` 时跳过危险 `K`，并记录源动作、当前动作类型和动作帧。
+
+## [0.6.5] - 2026-10-01
+
+### 修复
+
+- 修复连招穿过怪物后因命中停顿导致阶段时钟漂移、`K` 在 `THW_Dodge` 错误帧被消费的问题。
+- 新增 `ActionFrameClock`，按 `MotionActor_LC2.CurFrame` 的相邻推进量换算逻辑时间；动作帧停滞时阶段节拍同步降速。
+- 移除 `0.6.4` 检测异常动作后等待结束并重新开始整套循环的恢复方案，恢复过程继续按正常连招节奏运行。
+
+## [0.6.4] - 2026-10-01
+
+### 变更
+
+- 增加 `THW_DodgeAttack_A/B` 异常恢复原型：检测到冲刺攻击后停止注入，等待动作结束并从首次 `L` 蓄力重新开始。
+
+### 说明
+
+- 用户实机反馈该方案不是模拟手动连招，而是在失败后强制重开循环，因此 `0.6.5` 已移除。
+
 ## [0.6.3] - 2026-10-01
 
 ### 修复
@@ -125,3 +183,9 @@
 [0.3.0]: https://github.com/Kagarinokirie1/LC2AutoWhirlwindMonitor/releases/tag/v0.3.0
 [0.2.0]: https://github.com/Kagarinokirie1/LC2AutoWhirlwindMonitor/releases/tag/v0.2.0
 [0.1.0]: https://github.com/Kagarinokirie1/LC2AutoWhirlwindMonitor/releases/tag/v0.1.0
+[0.6.4]: https://github.com/Kagarinokirie1/LC2AutoWhirlwindMonitor/releases/tag/v0.6.4
+[0.6.5]: https://github.com/Kagarinokirie1/LC2AutoWhirlwindMonitor/releases/tag/v0.6.5
+[0.6.6]: https://github.com/Kagarinokirie1/LC2AutoWhirlwindMonitor/releases/tag/v0.6.6
+[0.6.9]: https://github.com/Kagarinokirie1/LC2AutoWhirlwindMonitor/releases/tag/v0.6.9
+[0.7.0]: https://github.com/Kagarinokirie1/LC2AutoWhirlwindMonitor/releases/tag/v0.7.0
+[0.7.1]: https://github.com/Kagarinokirie1/LC2AutoWhirlwindMonitor/releases/tag/v0.7.1
